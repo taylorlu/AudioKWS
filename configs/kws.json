@@ -1,0 +1,29 @@
+{
+    "data" : {
+        "train_jsons" : ["./data/trainSamples.json"],
+        "sample_rate" : 16000
+    },
+
+    "inference" : {
+        "num_banks" : 8,
+        "hidden_units" : 128,
+        "num_highway" : 2,
+        "norm_type" : "ins",
+        "hidden_size" : 256,
+        "batch_size" : 32
+    },
+
+    "train" : {
+        "learning_rate" : 2e-3,
+        "lr_decay_steps" : 500,
+        "lr_decay_rate" : 0.9,
+        "momentum" : 0.95,
+        "max_grad_norm" : 50,
+        "epochs" : 100
+    },
+
+    "io" : {
+        "restore_path" : "",
+        "save_path" : "./test"
+    }
+}
