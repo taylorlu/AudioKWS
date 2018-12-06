@@ -110,7 +110,7 @@ def queue_featurize_example(consumer, producer, sample_rate):
         labels = []
         inputs = []
         for b in batch:
-            labels.append(map(int, b['text'].split(',')))
+            labels.append(list(map(int, b['text'].split(','))))
             inputs.append(compute_features(b['key'], sample_rate))
         producer.put((inputs, labels))
 

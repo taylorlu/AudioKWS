@@ -122,7 +122,7 @@ class SpeechModel(object):
                       self._seq_lens : sequence_lengths}
         if labels:
             values = [l for label in labels for l in label]
-            label_lens = [len(list(label)) for label in labels]
+            label_lens = [len(label) for label in labels]
             label_dict = { self._labels : values,
                            self._label_lens : label_lens }
             feed_dict.update(label_dict)
