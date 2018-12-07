@@ -27,6 +27,13 @@ class SpeechModel(object):
         self._out_lens = self._seq_lens
 
         # TODO, awni, for now on the client to remember to initialize these.
+        self._mean = tf.get_variable("mean",
+                        shape=input_dim, trainable=False)
+        self._std = tf.get_variable("std",
+                        shape=input_dim, trainable=False)
+
+        std_inputs = (self._inputs - self._mean) / self._std
+
         # x = tf.layers.dense(self._inputs, units=hidden_units, activation=tf.nn.relu)  # (n, t, h)
 
         x = conv1d(self._inputs, hidden_units, 1, scope="conv1d")
@@ -48,6 +55,7 @@ class SpeechModel(object):
         rnn_out, state = gru(out, hidden_units, False, seqlens=self._seq_lens)  # (n, t, h)
 
         self._rnn_state = state
+        rnn_out = tf.transpose(rnn_out, [1, 0, 2])
 
         # Collapse time and batch dims pre softmax.
         rnn_out = tf.reshape(rnn_out, (-1, hidden_units))
@@ -132,6 +140,11 @@ class SpeechModel(object):
     def start_momentum(self, session):
         m = self._momentum.assign(self._momentum_val)
         session.run([m])
+
+    def set_mean_std(self, mean, std, session):
+        m = self._mean.assign(mean)
+        s = self._std.assign(std)
+        session.run([m, s])
 
     @property
     def cost(self):

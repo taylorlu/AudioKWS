@@ -118,6 +118,9 @@ def main(argv=None):
         else:
             session.run(tf.global_variables_initializer())
 
+        mean, std = producer.estimate_mean_std()
+        model.set_mean_std(mean, std, session)
+
         print("Begin training...")
         for e in range(epochs):
             run_epoch(model, producer, session, save_path, saver)

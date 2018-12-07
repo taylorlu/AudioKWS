@@ -6,10 +6,9 @@
 
     "inference" : {
         "num_banks" : 8,
-        "hidden_units" : 128,
+        "hidden_units" : 256,
         "num_highway" : 2,
         "norm_type" : "ins",
-        "hidden_size" : 256,
         "batch_size" : 32
     },
 

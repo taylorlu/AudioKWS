@@ -105,6 +105,9 @@ class MultiSpeechModel(object):
         m = self._momentum.assign(self._momentum_val)
         session.run([m])
 
+    def set_mean_std(self, mean, std, session):
+        self._models[0].set_mean_std(mean, std, session)
+
     @property
     def cost(self):
         assert self._init_cost, "Must init cost."
