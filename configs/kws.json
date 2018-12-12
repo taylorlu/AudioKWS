@@ -6,15 +6,16 @@
 
     "inference" : {
         "num_banks" : 8,
-        "hidden_units" : 256,
+        "hidden_units" : 320,
         "num_highway" : 2,
         "norm_type" : "ins",
+        "num_rnn_layer": 2,
         "batch_size" : 32
     },
 
     "train" : {
         "learning_rate" : 2e-3,
-        "lr_decay_steps" : 500,
+        "lr_decay_steps" : 3200,
         "lr_decay_rate" : 0.9,
         "momentum" : 0.95,
         "max_grad_norm" : 50,
@@ -23,6 +24,6 @@
 
     "io" : {
         "restore_path" : "",
-        "save_path" : "./test"
+        "save_path" : "./save"
     }
 }

@@ -19,6 +19,7 @@ class SpeechModel(object):
         num_highway = config['num_highway']
         norm_type = config['norm_type']
         batch_size = config['batch_size']
+        num_rnn_layer = config['num_rnn_layer']
         self._input_dim = input_dim = config['input_dim']
         self._output_dim = output_dim = config['alphabet_size']
 
@@ -33,8 +34,6 @@ class SpeechModel(object):
                         shape=input_dim, trainable=False)
 
         std_inputs = (self._inputs - self._mean) / self._std
-
-        # x = tf.layers.dense(self._inputs, units=hidden_units, activation=tf.nn.relu)  # (n, t, h)
 
         x = conv1d(self._inputs, hidden_units, 1, scope="conv1d")
 
@@ -52,8 +51,9 @@ class SpeechModel(object):
         for i in range(num_highway):
             out = highwaynet(out, num_units=hidden_units, scope='highwaynet_{}'.format(i))  # (n, t, h)
 
-        rnn_out, state = gru(out, hidden_units, False, seqlens=self._seq_lens)  # (n, t, h)
+        rnn_out, state, initial_state = gru(out, hidden_units, False, seqlens=self._seq_lens, num_layers=num_rnn_layer, is_training=is_training)  # (n, t, h)
 
+        self._initial_state = initial_state
         self._rnn_state = state
         rnn_out = tf.transpose(rnn_out, [1, 0, 2])
 
@@ -110,7 +110,7 @@ class SpeechModel(object):
         self._grad_norm = norm
         self._init_train = True
 
-    def feed_dict(self, inputs, labels=None):
+    def feed_dict(self, inputs, labels=None, rnn_state=None):
         """
         Constructs the feed dictionary from given inputs necessary to run
         an operations for the model.
@@ -134,6 +134,9 @@ class SpeechModel(object):
             label_dict = { self._labels : values,
                            self._label_lens : label_lens }
             feed_dict.update(label_dict)
+        if rnn_state is not None:
+            for i, r in zip(self._initial_state, rnn_state):
+                feed_dict[i] = r
 
         return feed_dict
 
@@ -165,6 +168,11 @@ class SpeechModel(object):
     def global_step(self):
         assert self._init_train, "Must init train."
         return self._global_step
+
+    @property
+    def initial_state(self):
+        assert self._init_inference, "Must init inference."
+        return self._initial_state
 
     @property
     def input_dim(self):

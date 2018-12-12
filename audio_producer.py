@@ -34,19 +34,7 @@ class AudioProducer(object):
         data = []
         for dj in data_jsons:
             data.extend(_read_data_json(dj))
-        data = sorted(data, key=lambda x : x['duration'])
 
-        def bad_data_fn(d):
-            if d['duration'] > max_duration or d['duration'] < min_duration:
-                return False
-            # For CTC number of input steps has to be greater
-            # than number of labels.
-            # TODO, awni, better way to do this.
-            # if len(d['text']) >= _spec_time_steps(d['duration']) / 3:
-            #     return False
-            return True
-
-        data = list(filter(bad_data_fn, data))
         self.data = data
 
         # *NB* this cuts off the longest data items in the last segment
@@ -65,16 +53,12 @@ class AudioProducer(object):
         std = np.std(feats, axis=1)
         return mean, std
 
-    def iterator(self, sort=False, max_size=3,
+    def iterator(self, max_size=3,
                  num_workers=3, max_examples=None):
         random.shuffle(self.data)
         self.batches = [self.data[i:i+self.batch_size]
                    for i in range(0, len(self.data) - self.batch_size + 1, self.batch_size)]
-        if sort:
-            batches = sorted(self.batches,
-                             key=lambda d : d[-1]['duration'])
-        else:
-            batches = self.batches
+        batches = self.batches
 
         if max_examples is not None:
             batches = batches[:int(max_examples / self.batch_size)]
@@ -95,7 +79,7 @@ class AudioProducer(object):
 
     @property
     def alphabet_size(self):
-        return 395
+        return 1500
 
     @property
     def input_dim(self):

@@ -46,9 +46,8 @@ def run_epoch(model, producer, session, save_path, saver):
     compute_time = 0
 
     step, = session.run([model.global_step])
-    sort = (step == 0)
 
-    for e, (inputs, labels) in enumerate(producer.iterator(sort=sort)):
+    for e, (inputs, labels) in enumerate(producer.iterator()):
 
         compute_time -= time.time()
         feed_dict = model.feed_dict(inputs, labels)

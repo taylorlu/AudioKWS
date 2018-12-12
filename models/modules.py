@@ -162,7 +162,7 @@ def conv1d_banks(inputs, K=16, num_units=None, norm_type=None, is_training=True,
     return outputs # (N, T, Hp.embed_size//2*K)
 
 
-def gru(inputs, num_units=None, bidirection=False, seqlens=None, scope="gru", reuse=None):
+def gru(inputs, num_units=None, bidirection=False, seqlens=None, num_layers=2, is_training=True, scope="gru", reuse=None):
     '''Applies a GRU.
 
     Args:
@@ -180,13 +180,20 @@ def gru(inputs, num_units=None, bidirection=False, seqlens=None, scope="gru", re
     '''
     with tf.variable_scope(scope, reuse=reuse):
         if num_units is None:
-            num_units = inputs.get_shape().as_list[-1]
+            num_units = inputs.get_shape()[-1]
 
-        cell = tf.contrib.rnn.DropoutWrapper(tf.contrib.rnn.GRUCell(num_units,kernel_initializer=tf.orthogonal_initializer()),output_keep_prob=0.5)
-        outputs, last_state = tf.nn.dynamic_rnn(cell, inputs,
+        keep_prob = 0.5
+        if(not is_training):
+            keep_prob = 1.0
+
+        layers = [tf.contrib.rnn.DropoutWrapper(tf.contrib.rnn.GRUCell(num_units,kernel_initializer=tf.orthogonal_initializer()),output_keep_prob=keep_prob) for _ in range(num_layers)]
+        cells = tf.nn.rnn_cell.MultiRNNCell(layers)
+        initial_state = cells.zero_state(inputs.get_shape()[0], tf.float32)
+        outputs, last_state = tf.nn.dynamic_rnn(cells, inputs,
                                        sequence_length=seqlens,
-                                       dtype=tf.float32)
-        return outputs, last_state
+                                       dtype=tf.float32,
+                                       initial_state=initial_state)
+        return outputs, last_state, initial_state
 
 
 def highwaynet(inputs, num_units=None, scope="highwaynet", reuse=None):
