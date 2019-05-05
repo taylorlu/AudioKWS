@@ -4,7 +4,7 @@ The reference implementation and open-source datasets of the high-quality keywor
 Spotting and Voice Activity Detection](https://arxiv.org/abs/1611.09405).
 
 # This project using cbhg module which contained in Tacotron to replace the default CNN module.
-
+![CBHG](https://github.com/taylorlu/AudioKWS/blob/master/images/3-Figure2-1.png)
 
 ## Abstract
 
